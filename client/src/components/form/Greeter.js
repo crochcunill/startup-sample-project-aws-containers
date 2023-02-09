@@ -41,7 +41,6 @@ console.log(values)
             options={[
               { value: 'Aloha', label: 'Aloha' },
               { value: 'Bonjour', label: 'Bonjour' },
-              { value: 'Containers', label: 'Containers App for ubwyx8 Feb 7, 2023' },
               { value: 'Greetings and salutations', label: 'Greetings and salutations' },
               { value: 'Hello', label: 'Hello' },
               { value: 'Howdy', label: 'Howdy' },

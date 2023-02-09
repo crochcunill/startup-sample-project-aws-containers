@@ -14,4 +14,3 @@ generate "test_tfvars" {
 service_names = ["ssp"]
 EOF
 }
-Footer

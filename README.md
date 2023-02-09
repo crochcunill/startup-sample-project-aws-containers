@@ -4,8 +4,8 @@
 
 ---
 
-
 ## Introduction
+
 
 Welcome to your new project. This is a basic BC Gov AWS "Hello World" starter project to get you started in your cloud journey.  It is a NodeJS app connected to a database for you to modify and expand to fit your needs. It provides scripts for developing and running the application either
 
@@ -84,52 +84,44 @@ Note: The above commands will work when executed from the container defined in _
 
 ### Prerequisites for building in the AWS Cloud
 
-This code assumes that you have access to AWS Cloud and that you have created IAM roles linked to your repository and the Github OIDC provider in AWS. These roles will be used by the Terraform scripts to create the infrastructure in AWS. Those roles has to be created by the Ministry teams and then added in your repository. (You can see below how to create them)
 
-Once the project set is created, it will have one or more service accounts associated each of them with different IAM Roles ARN.
+This code assumes that you have credentials that allow access to the AWS Cloud. These credentials will be used by the Terraform scripts to create the infrastructure in AWS. The credentials are created as part of the project set creation by the Cloud Pathfinder team.
 
-These roles ARN, necessary to access AWS Cloud, are set for every Github environment. The values themselves are stored as GitHub environment _Secrets_
+Once the project set is created, it will have one or more service accounts associated each of them with different credentials and roles.
+
+These credentials, necessary to access AWS Cloud, are send to Terraform cloud by the GitHub Actions. The values themselves are stored as GitHub _Secrets_
 
 
-The required environment Secrets are:
-  - `TERRAFORM_DEPLOY_ROLE_ARN` This is the ARN of IAM Role used to deploy resources through the Github action authenticate with the GitHub OpenID Connect. 
-  - - Create the IAM Policy for `tools` or `Sandbox`  with this [policy](https://github.com/bcgov/startup-sample-project-aws-containers/blob/main/docs/IAM_policies/Registry_Deployment_IAM_Policy.json) (Be Careful to replace `<Licence_plate>` `<Environment>` and `<Environment>`)
-  - - Create the IAM Policy for `dev` `test` and `prod`  with this [policy](https://github.com/bcgov/startup-sample-project-aws-containers/blob/main/docs/IAM_policies/App_Deployment_IAM_Policy.json) (Be Careful to replace `<Licence_plate>` `<Environment>` and `<Environment>`)
-  - - To access the `TERRAFORM_DEPLOY_ROLE_ARN` you need to create the role beforehand and link them to the previously created policies in each account. Then you have to add the right arn for each Github environment.      
-  To create the role trust relationship you can use this example:
-  ```
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "Federated": "arn:aws:iam::<accound_id>:oidc-provider/token.actions.githubusercontent.com"
-            },
-            "Action": "sts:AssumeRoleWithWebIdentity",
-            "Condition": {
-                "StringLike": {
-                    "token.actions.githubusercontent.com:sub": "repo:<Github_organization>/<repo_name>:ref:refs/heads/<Your_branch>"
-                },
-                "ForAllValues:StringEquals": {
-                    "token.actions.githubusercontent.com:iss": "https://token.actions.githubusercontent.com",
-                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
-                }
-            }
-        }
-    ]
-}
-  ```
-
-For the following secret they are global for every account so you can put them as Github repository _Secrets_
+The required Secrets are:
+- `AWS_ACCESS_KEY_ID` - credentials for you service account
+- `AWS_SECRET_ACCESS_KEY` - credentials for you service account
+- `AWS_ROLE_TO_ASSUME` - ARN of the role to assume with your credentials. Follows the pattern `arn:aws:iam::############:role/PBMMOps-BCGOV_sandbox_Project_Role_ecr_read_write` where `############` is your AWS account number.
 
 - `AWS_ACCOUNTS_ECR_READ_ACCESS` - is used to authorize the read access to the ECS from the other AWS accounts (dev, test, prod). It is an array where the individual elemens take the format  follows the format `arn:aws:iam::############:root` where `############` is your AWS account number. For exmple: 
 
     AWS_ACCOUNTS_ECR_READ_ACCESS='["arn:aws:iam::DEV_ACCOUNT_NUMBER:root", "arn:aws:iam::TEST_ACCOUNT_NUMBER:root", "arn:aws:iam::PROD_ACCOUNT_NUMBER:root"]'
 
+    
+
+A more target approach is possible, it is not necessary to authorize entire accounts.
 
 - `AWS_ECR_URI` - ECR repository URI. Follows the format `############.dkr.ecr.ca-central-1.amazonaws.com/ssp` where `############` is your AWS account number.
 - `AWS_REGION` - should be `ca-central-1`
+- `TFC_TEAM_TOKEN` - Terraform Cloud team token with access to Terraform workspaces used to deploy the app and infrastructure to AWS.
+
+
+### Customizing the code
+
+To install the app on the Cloud you will need access to BCGov-SEA Cloud in AWS
+
+In the forked version of the code, you will need to:
+
+
+- replace the project variable with your License Plate (line 4 of _./terraform/terragrunt.hcl_ file)
+- replace the cloud_origin_domain with your license plate value (line 17 _./terraform/dev/terragrunt.hcl_ file)
+- replace the project variable with your License Plate (line 8 of _./terraform/sandbox/terragrunt.hcl_ file)
+
+Note: License plate is one of the access keys provided by the Cloud Pathfinder group to allow access to BCGov SEA - AWS
 
 ### Deployment
 
@@ -150,7 +142,7 @@ The Actions will run Terraform scripts that will deploy the infrastructure for t
 
 and instantiated using `./terraform/terragrunt.hcl` file.
 
-Properly speaking, the Terraform scripts will create an infrastructure plan, and a second script will apply the plan and deploy the planned infrastructure in AWS Cloud.
+Properly speaking, the Terraform scripts will create an infrastructure plan in the Terraform Cloud, and a second script will apply the plan and deploy the planned infrastructure in AWS Cloud.
 
 During the deployment process, Terraform script will create in the AWS Cloud an Elastic Container Registry (ECR) repository in the sandbox service account and authorize read access from other AWS service accounts (dev, sandbox).
 
@@ -164,11 +156,12 @@ You will be able to access the client using the address set for the variable clo
 [license plate-dev] will take, for example, the following form `bc1dae-dev`
 
 
-Properly speaking, the Terraform scripts will create an infrastructure plan, and a second script will apply the plan and deploy the planned infrastructure in AWS Cloud.
+Properly speaking, the Terraform scripts will create an infrastructure plan in the Terraform Cloud, and a second script will apply the plan and deploy the planned infrastructure in AWS Cloud.
 
 
 
 During the deployment process, Terraform script will create in the AWS Cloud an Elastic Container Registry (ECR) repository in the sandbox service account and authorize read access from other AWS service accounts (dev, sandbox).
+
 
 
 Inside this container, three containers are created that will host the client, server and DB components of the app.
@@ -180,13 +173,6 @@ You will be able to access the client using the address set for the variable clo
 
 [license plate-dev] will take, for example, the following form `bc1dae-dev`
 
-
-## Contributing
-
-Be aware that pull request from fork will fail due to the lack of access of the secrets variables.  
-You are still welcome to participe but for the plan to work before merge it has to be done from within the repository.
-
-:warning: The terraform plan stage will fail in cross account pr workflow :warning:
 
 
 ## License
