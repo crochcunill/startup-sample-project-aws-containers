@@ -1,4 +1,4 @@
-name: Destroy environment
+name: Destroy environment Old tokens
 
 on:
   workflow_dispatch:

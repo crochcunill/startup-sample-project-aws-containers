@@ -12,7 +12,7 @@ env:
 jobs:
   tf_apply:
     name: Deploy sandbox AWS ECR
-    environment: sandbox
+    environment: tools
     runs-on: ubuntu-22.04
 
     steps:
