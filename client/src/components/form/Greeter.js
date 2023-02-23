@@ -41,7 +41,7 @@ console.log(values)
             options={[
               { value: 'Aloha', label: 'Aloha' },
               { value: 'Bonjour', label: 'Bonjour' },
-              { value: 'TEST', label: 'Containers App - m9tvhw - upgrade 1.5.5 - Feb 13 2023' },
+              { value: 'TEST', label: 'Redeploy Containers App - td5cou - upgrade 1.5.5 - Feb 23 2023' },
               { value: 'Greetings and salutations', label: 'Greetings and salutations' },
               { value: 'Hello', label: 'Hello' },
               { value: 'Howdy', label: 'Howdy' },
